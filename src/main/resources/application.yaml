@@ -1,0 +1,34 @@
+spring:
+  application:
+    name: banking-practice
+  datasource:
+    url: jdbc:postgresql://localhost:5432/banking-practice
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      pool-name: BankingPractice
+      # Công thức: connections = (core_count * 2) + effective_spindle_count
+      # Máy 4 core, SSD → 4*2+1 = 9, làm tròn lên 10
+      maximum-pool-size: 10
+      minimum-idle: 3
+      # Fail fast: 3s thay vì default 30s
+      connection-timeout: 3000
+      idle-timeout: 600000      # 10 phút
+      max-lifetime: 1800000     # 30 phút
+      connection-test-query: SELECT 1
+  flyway:
+    enabled: true  # Enable Flyway cho PostgreSQL
+    baseline-on-migrate: true
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  sql:
+    init:
+      mode: always
