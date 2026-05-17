@@ -63,6 +63,22 @@ spring:
     listener:
       ack-mode: MANUAL_IMMEDIATE    # Tự tay ack, không auto
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, prometheus, metrics, info
+  endpoint:
+    prometheus:
+      enabled: true
+  metrics:
+    tags:
+      application: banking-api   # label xuất hiện trên mọi metric
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true   # bật histogram để tính P99
+      percentiles:
+        http.server.requests: 0.5, 0.95, 0.99
 # ==================== LOGGING ====================
 #logging:
 #  level:

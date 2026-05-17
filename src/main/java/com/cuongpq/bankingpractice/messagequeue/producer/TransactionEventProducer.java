@@ -23,7 +23,7 @@ public class TransactionEventProducer {
         TransactionEvent event = TransactionEvent.builder()
                 .eventId(UUID.randomUUID().toString())
                 .eventType("TRANSFER_COMPLETED")
-                .transactionId(tx.getId().toString())
+//                .transactionId(tx.getId().toString())
                 .fromAccountNumber(from.getAccountNumber())
                 .toAccountNumber(tx.getToAccount().getAccountNumber())
                 .fromOwnerName(from.getOwnerName())

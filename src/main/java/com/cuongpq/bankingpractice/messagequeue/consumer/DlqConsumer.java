@@ -1,11 +1,9 @@
 package com.cuongpq.bankingpractice.messagequeue.consumer;
 
-import com.cuongpq.bankingpractice.config.KafkaConsumerConfig;
 import com.cuongpq.bankingpractice.config.KafkaTopicConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
-import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
@@ -18,7 +16,6 @@ import java.util.Map;
 public class DlqConsumer {
 
     @KafkaListener(topics = KafkaTopicConfig.TOPIC_TRANSACTIONS_DLQ,
-//            groupId = KafkaConsumerConfig.DLQ_HANDLER,
             containerFactory = "dlqKafkaListenerContainerFactory")
     public void handleDlq(@Payload String rawMessage, @Headers Map<String, Object> headers, Acknowledgment ack) {
         try {

@@ -1,6 +1,5 @@
 package com.cuongpq.bankingpractice.messagequeue.consumer;
 
-import com.cuongpq.bankingpractice.config.KafkaConsumerConfig;
 import com.cuongpq.bankingpractice.config.KafkaTopicConfig;
 import com.cuongpq.bankingpractice.dto.event.TransactionEvent;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +16,6 @@ public class NotificationConsumer {
 
     @KafkaListener(
             topics = KafkaTopicConfig.TOPIC_TRANSACTIONS,
-//            groupId = KafkaConsumerConfig.TRANSACTION_GROUP,
             containerFactory = "kafkaListenerContainerFactory"
     )
     public void handleTransactionEvent(

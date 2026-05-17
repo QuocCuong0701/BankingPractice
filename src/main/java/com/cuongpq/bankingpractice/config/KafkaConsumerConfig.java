@@ -32,22 +32,6 @@ public class KafkaConsumerConfig {
 
     private final KafkaTemplate<String, TransactionEvent> kafkaTemplate;
 
-    /*@Bean
-    public ConsumerFactory<String, TransactionEvent> consumerFactory() {
-        Map<String, Object> config = new HashMap<>();
-
-        config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        config.put(ConsumerConfig.GROUP_ID_CONFIG, TRANSACTION_GROUP);
-        config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JacksonJsonDeserializer.class);
-
-        JacksonJsonDeserializer<TransactionEvent> deserializer = new JacksonJsonDeserializer<>(TransactionEvent.class);
-
-        deserializer.addTrustedPackages("*");
-
-        return new DefaultKafkaConsumerFactory<>(config, new StringDeserializer(), deserializer);
-    }*/
-
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, TransactionEvent> kafkaListenerContainerFactory() {
         Map<String, Object> props = new HashMap<>();
