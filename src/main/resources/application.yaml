@@ -2,7 +2,7 @@ spring:
   application:
     name: banking-practice
   datasource:
-    url: jdbc:postgresql://localhost:5432/banking-practice
+    url: jdbc:postgresql://172.21.193.243:5432/banking-practice
     username: postgres
     password: postgres
     driver-class-name: org.postgresql.Driver
@@ -28,7 +28,49 @@ spring:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
-
   sql:
     init:
       mode: always
+  kafka:
+#    bootstrap-servers: localhost:9092
+    bootstrap-servers: 172.21.193.243:9092
+
+    producer:
+      # Serialize message thành JSON
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+      # acks=all → đợi tất cả replica xác nhận trước khi coi là gửi thành công
+      # Quan trọng trong banking — không để mất message
+      acks: all
+
+      # Thử lại tối đa 3 lần nếu gửi thất bại
+      retries: 3
+
+      properties:
+        # Đảm bảo không gửi duplicate khi retry
+        enable.idempotence: true
+
+    consumer:
+      group-id: banking-service
+      auto-offset-reset: earliest   # Đọc từ đầu nếu chưa có offset
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        # Chỉ trust class trong package này, tránh deserialization attack
+        spring.json.trusted.packages: "com.cuongpq.bankingpractice.event"
+
+    # Dead Letter Queue — message lỗi sau 3 lần retry sẽ vào đây
+    listener:
+      ack-mode: MANUAL_IMMEDIATE    # Tự tay ack, không auto
+
+# ==================== LOGGING ====================
+#logging:
+#  level:
+#    root: INFO
+#    com.cuongpq.bankingpractice: DEBUG
+#    org.springframework.web: INFO
+#    org.hibernate.SQL: DEBUG
+#    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+#  pattern:
+#    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"

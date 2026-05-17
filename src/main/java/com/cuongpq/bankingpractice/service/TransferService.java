@@ -9,12 +9,15 @@ import com.cuongpq.bankingpractice.exception.AccountFrozenException;
 import com.cuongpq.bankingpractice.exception.AccountNotFoundException;
 import com.cuongpq.bankingpractice.exception.InsufficientFundsException;
 import com.cuongpq.bankingpractice.exception.SameAccountException;
+import com.cuongpq.bankingpractice.messagequeue.producer.TransactionEventProducer;
 import com.cuongpq.bankingpractice.repository.AccountRepository;
 import com.cuongpq.bankingpractice.repository.TransactionRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
@@ -28,6 +31,8 @@ public class TransferService {
 
     private final AccountRepository accountRepo;
     private final TransactionRepository txRepo;
+
+    private final TransactionEventProducer eventProducer;
 
     @Transactional
     public TransferResponse transfer(TransferRequest request) {
@@ -84,6 +89,19 @@ public class TransferService {
         log.info("Transfer OK: {} → {} | amount={} | txId={}",
                 from.getAccountNumber(), to.getAccountNumber(),
                 request.getAmount(), tx.getId());
+
+        // ★ Publish event SAU KHI commit DB thành công
+        // Nếu đặt trước save() → DB fail nhưng Kafka đã gửi → consumer xử lý phantom tx
+        // Spring @Transactional commit sau khi method return
+        // Nên dùng TransactionSynchronizationManager để chắc chắn publish AFTER commit
+        TransactionSynchronizationManager.registerSynchronization(
+                new TransactionSynchronization() {
+                    @Override
+                    public void afterCommit() {
+                        eventProducer.publishTransferCompleted(tx, from);
+                    }
+                }
+        );
 
         return buildResponse(tx, from.getBalance());
     }
