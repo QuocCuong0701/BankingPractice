@@ -67,3 +67,4 @@ services:
     depends_on: [ prometheus ]
 volumes:
   pgdata:
+  grafana-data:
