@@ -10,7 +10,7 @@ spring:
       pool-name: BankingPractice
       # Công thức: connections = (core_count * 2) + effective_spindle_count
       # Máy 4 core, SSD → 4*2+1 = 9, làm tròn lên 10
-      maximum-pool-size: 10
+      maximum-pool-size: 50
       minimum-idle: 3
       # Fail fast: 3s thay vì default 30s
       connection-timeout: 3000
@@ -26,7 +26,6 @@ spring:
     show-sql: true
     properties:
       hibernate:
-        format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
   sql:
     init:

@@ -36,7 +36,8 @@ public class Account {
     // ★ KEY: JPA tự động check version khi UPDATE
     // UPDATE accounts SET balance=?, version=2 WHERE id=? AND version=1
     // Nếu version không khớp → OptimisticLockException → rollback
-    @Version
+    // TODO - tạm comment vì đã dùng Pessimistic lock
+//    @Version
     private Long version;
 
     @Column(name = "created_at", nullable = false)

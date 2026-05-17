@@ -21,7 +21,7 @@ public class TransferServiceTest {
     @Transactional
     void shouldAcquireLockSuccessfully() {
         // Given
-        Optional<Account> account = accountRepository.findByAccountNumber("ACC001");
+        Optional<Account> account = accountRepository.findByAccountNumber("ACC0001");
         if (account.isEmpty()) {
             return;
         }

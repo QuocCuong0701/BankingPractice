@@ -28,6 +28,7 @@ import org.springframework.util.StringUtils;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -89,11 +90,21 @@ public class TransferService {
                 }
             }
 
-            // 2. Load accounts
-            Account from = accountRepo.findByAccountNumber(request.getFromAccountNumber())
-                    .orElseThrow(() -> new AccountNotFoundException("Không tìm thấy: " + request.getFromAccountNumber()));
-            Account to = accountRepo.findByAccountNumber(request.getToAccountNumber())
-                    .orElseThrow(() -> new AccountNotFoundException("Không tìm thấy: " + request.getToAccountNumber()));
+            // 2. Load 2 accounts theo thứ tự UUID đã sort — tránh deadlock
+            UUID fromId = getAccountIdByNumber(request.getFromAccountNumber());
+            UUID toId = getAccountIdByNumber(request.getToAccountNumber());
+
+            // Sort để đảm bảo mọi thread luôn lock cùng thứ tự
+            UUID firstId = fromId.compareTo(toId) < 0 ? fromId : toId;
+            UUID secondId = fromId.compareTo(toId) < 0 ? toId : fromId;
+
+            // Lock theo thứ tự đã sort — PESSIMISTIC vì concurrent rất cao
+            Account first = accountRepo.findByIdWithLock(firstId).orElseThrow(() -> new AccountNotFoundException("Not found: " + firstId));
+            Account second = accountRepo.findByIdWithLock(secondId).orElseThrow(() -> new AccountNotFoundException("Not found: " + secondId));
+
+            // Map lại đúng from/to sau khi đã load
+            Account from = first.getId().equals(fromId) ? first : second;
+            Account to = first.getId().equals(toId) ? first : second;
 
             // 3. Validate
             if (from.getStatus() != Account.AccountStatus.ACTIVE) {
@@ -114,8 +125,8 @@ public class TransferService {
 
             // @Version tự check: nếu ai đó update cùng account →
             // OptimisticLockException → Spring rollback → client nhận 409
-            accountRepo.save(from);
-            accountRepo.save(to);
+//            accountRepo.save(from);
+//            accountRepo.save(to);
 
             // 5. Ghi transaction log
             Transaction tx = Transaction.builder()
@@ -157,6 +168,12 @@ public class TransferService {
                     "reason", e.getClass().getSimpleName()).increment();
             throw e;
         }
+    }
+
+    // Helper — lấy UUID từ account number (cần thêm method này)
+    private UUID getAccountIdByNumber(String accountNumber) {
+        return accountRepo.findByAccountNumber(accountNumber).map(Account::getId)
+                .orElseThrow(() -> new AccountNotFoundException("Not found: " + accountNumber));
     }
 
     private TransferResponse buildResponse(Transaction tx, BigDecimal newBalance) {

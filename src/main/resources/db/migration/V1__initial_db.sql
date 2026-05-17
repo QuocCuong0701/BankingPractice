@@ -30,7 +30,7 @@ CREATE INDEX IF NOT EXISTS idx_accounts_number ON accounts (account_number);
 
 -- Seed data
 INSERT INTO accounts (id, account_number, owner_name, balance, currency, status, version, created_at)
-VALUES (gen_random_uuid(), 'ACC001', 'Nguyen Van A', 10000000, 'VND', 'ACTIVE', 0, now()),
-       (gen_random_uuid(), 'ACC002', 'Tran Thi B', 5000000, 'VND', 'ACTIVE', 0, now())
+VALUES (gen_random_uuid(), 'ACC0001', 'Nguyen Van A', 10000000, 'VND', 'ACTIVE', 0, now()),
+       (gen_random_uuid(), 'ACC0002', 'Tran Thi B', 5000000, 'VND', 'ACTIVE', 0, now())
 ON CONFLICT
     DO NOTHING;
