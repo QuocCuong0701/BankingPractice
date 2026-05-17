@@ -2,7 +2,7 @@ spring:
   application:
     name: banking-practice
   datasource:
-    url: jdbc:postgresql://172.21.193.243:5432/banking-practice
+    url: jdbc:postgresql://localhost:5432/banking-practice
     username: postgres
     password: postgres
     driver-class-name: org.postgresql.Driver
@@ -32,8 +32,7 @@ spring:
     init:
       mode: always
   kafka:
-#    bootstrap-servers: localhost:9092
-    bootstrap-servers: 172.21.193.243:9092
+    bootstrap-servers: localhost:9092
 
     producer:
       # Serialize message thành JSON
